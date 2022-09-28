@@ -19,10 +19,24 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
+        
         stage('Test') {
             steps {
                 sh 'mvn test'
             }
+            stage('Sonarqube') {
+    environment {
+        scannerHome = tool 'SonarQube'
+    }
+    steps {
+        withSonarQubeEnv('sonarqube') {
+            sh "${scannerHome}/root/sonar-scanner"
+        }
+        timeout(time: 10, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+        }
+    }
+}
         }
         stage('Build Image') {
             steps {
