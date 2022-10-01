@@ -24,6 +24,20 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        stage('Sonarqube') {
+     steps {
+        container('maven') {
+            script {
+               withSonarQubeEnv('SonarQube') {
+                  sh 'mvn clean package sonar:sonar'
+               }
+               timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+               }
+            }
+        }
+     }
+}
         stage('Build Image') {
             steps {
                 script{
